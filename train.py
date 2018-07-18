@@ -2,40 +2,21 @@
 
 import vrep
 import rl_helper
+import rlcontroller
 
 from pynput.keyboard import Key, Listener
 import threading
 
+import torch
+from torch.autograd import Variable
+
+from rlcontroller import Actor
+
 thrustValue = 0.0
-
-def on_press(key):
-    print('{0} pressed'.format(
-        key))
-    global thrustValue
-    if key == Key.up:
-        thrustValue += 0.1
-    if key == Key.down:
-        thrustValue -= 0.1
-
-def on_release(key):
-    print('{0} release'.format(
-        key))
-    if key == Key.esc:
-        # Stop listener
-        return False
-
-def worker():
-    """thread worker function"""
-    print 'Worker'
-    # Collect events until released
-    with Listener(on_press=on_press, on_release=on_release) as listener:
-        listener.join()
-    return
-
-t = threading.Thread(target=worker)
-t.start()
-
 rl_functions = None
+
+actor = rlcontroller.Actor(2)
+
 try:
     vrep.simxFinish(-1)
     clientID = vrep.simxStart('127.0.0.1', 19997, True, True, 5000, 5)
@@ -48,6 +29,17 @@ try:
         rl_functions.start_sim()
 
         while vrep.simxGetConnectionId(clientID) != -1:
+
+            for i in range(10000):  # number episodes
+                print "episode"
+                # Reset environment
+                done = False
+                while not done:
+                    # Check if drone is underground ?
+                    print "pol"
+                    a = Variable(torch.randn(4))
+                    coucou = actor(a)
+
             rl_functions.rotor_data = [thrustValue, thrustValue, thrustValue, thrustValue]
             rl_functions.do_action()
             rl_functions.target_z = 5.0

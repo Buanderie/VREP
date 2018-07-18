@@ -6,7 +6,6 @@ from scipy.stats import norm
 import vrep
 import vrep_rotors, vrep_imu
 
-
 class RL(object):
     def __init__(self, clientID):
         self.clientID = clientID
@@ -57,6 +56,7 @@ class RL(object):
 
     def get_reward(self):
         self.curr_location = self.get_state()
+        print self.curr_location
         deviation_x = np.linalg.norm(self.curr_location[0] - self.orig_location[0])
         deviation_y = np.linalg.norm(self.curr_location[1] - self.orig_location[1])
         deviation_z = np.linalg.norm(self.target_z - self.curr_location[2])
@@ -83,4 +83,5 @@ class RL(object):
 
     def get_state(self):
         self.pos = vrep_imu.get_pos(self.clientID, self.quadHandle)
+        print vrep_imu.get_imu(self.clientID)
         return self.pos
